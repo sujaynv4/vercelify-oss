@@ -56,7 +56,7 @@ teardown() { kill "$MOCK_PID" 2>/dev/null; rm -rf "$T"; }
 @test "env pull writes production values, private, never overwrites" {
   run "$VFY" env pull blog
   [ "$status" -eq 0 ]
-  [ "$(stat -c %a .env)" = 600 ]
+  [ "$(stat -c %a .env 2>/dev/null || stat -f %Lp .env)" = 600 ]
   grep -qx 'DATABASE_URL="postgres://u:p@db/x"' .env
   grep -qx 'QUOTE="say \\"hi\\""' .env
   ! grep -q preview .env
@@ -211,6 +211,11 @@ teardown() { kill "$MOCK_PID" 2>/dev/null; rm -rf "$T"; }
   [[ "$output" == "**Cause:** the import"* ]]
   [[ "$output" != *"thinking about"* ]]
   [[ "$output" == *"— gemma-4-26b-a4b-it via the Gemini API"* ]]
+  grep -q '"thinkingLevel":"minimal"' "$T/requests.log"
+  # A passing 500 is retried.
+  GEMINI_API_KEY=gem-flaky run "$VFY" why --log build.log --provider gemini
+  [ "$status" -eq 0 ]
+  [[ "$output" == "**Cause:** the import"* ]]
   run grep -q 'gem-key' "$T/requests.log"   # the mock logs the URL and body, never the key
   [ "$status" -ne 0 ]
   # Server mode works with it too.
