@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
       - uses: dtolnay/rust-toolchain@stable
@@ -91,7 +91,7 @@ jobs:
         working-directory: cockpit
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -123,7 +123,7 @@ jobs:
           key: ${{ matrix.target }}
       - run: pip install cargo-zigbuild
       - run: cargo zigbuild --release --locked -p vercelify-agent --target ${{ matrix.target }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vercelify-agent-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/vercelify-agent
